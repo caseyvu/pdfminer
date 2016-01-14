@@ -12,7 +12,7 @@ from .layout import LTCurve
 from .layout import LTFigure
 from .layout import LTImage
 from .layout import LTChar
-from .layout import LTTextLine
+from .layout import LTTextLine, LTTextLineHorizontal, LTTextLineVertical
 from .layout import LTTextBox
 from .layout import LTTextBoxVertical
 from .layout import LTTextGroup
@@ -195,6 +195,42 @@ class TextConverter(PDFConverter):
 
     def paint_path(self, gstate, stroke, fill, evenodd, path):
         return
+
+class TextConverterWithSimpleOrdering(TextConverter):
+
+    def __init__(self, rsrcmgr, outfp, codec='utf-8', pageno=1, laparams=None,
+                 showpageno=False, imagewriter=None):
+        super(self.__class__, self).__init__(rsrcmgr, outfp, codec, pageno, laparams, showpageno, imagewriter)
+
+    def receive_layout(self, ltpage):
+
+        def compare_bboxes(bbox1, bbox2):
+            max_y_1 = max(bbox1[1::2])
+            max_y_2 = max(bbox2[1::2])
+            min_x_1 = min(bbox1[::2])
+            min_x_2 = min(bbox2[::2])
+            return cmp((-max_y_1,min_x_1),(-max_y_2,min_x_2))
+
+        def collect_text_lines(item, text_lines):
+            if isinstance(item, LTTextLineHorizontal):
+                s = item.get_text().strip()
+                if len(s) <= 0:
+                    return
+                text_lines.append({'bbox':item.bbox, 'text':s})
+            elif isinstance(item, LTContainer):
+                for child in item:
+                    collect_text_lines(child, text_lines)
+
+        def render(item):
+            text_lines = list()
+            collect_text_lines(item, text_lines)
+            text_lines.sort(cmp=compare_bboxes, key=lambda x:x['bbox'])
+            self.write_text('\n'.join([tl['text'] for tl in text_lines]))
+
+        if self.showpageno:
+            self.write_text('Page %s\n' % ltpage.pageid)
+        render(ltpage)
+        self.write_text('\f')
 
 
 ##  HTMLConverter

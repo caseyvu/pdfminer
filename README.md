@@ -1,3 +1,12 @@
+What is in this fork?
+========
+[TO-DO]:
+Customized text extractor tool(s) which take into account the positions of the text in the page. The tool shall assume only horizontal texts.  
+* Assumption on text positions: Texts are supposed to be read in top-down, left-to-right order
+* The extractor will try to detect columns in the text format and read text in column-by-column manner. 
+
+[BELOW IS THE DOCUMENTATION FROM THE ORIGINAL PDFMINER]
+
 PDFMiner
 ========
 

@@ -213,10 +213,7 @@ class TextConverterWithSimpleOrdering(TextConverter):
 
         def collect_text_lines(item, text_lines):
             if isinstance(item, LTTextLineHorizontal):
-                s = item.get_text().strip()
-                if len(s) <= 0:
-                    return
-                text_lines.append({'bbox':item.bbox, 'text':s})
+                text_lines.append({'bbox':item.bbox, 'text':item.get_text()})
             elif isinstance(item, LTContainer):
                 for child in item:
                     collect_text_lines(child, text_lines)
@@ -225,7 +222,7 @@ class TextConverterWithSimpleOrdering(TextConverter):
             text_lines = list()
             collect_text_lines(item, text_lines)
             text_lines.sort(cmp=compare_bboxes, key=lambda x:x['bbox'])
-            self.write_text('\n'.join([tl['text'] for tl in text_lines]))
+            self.write_text(''.join([tl['text'] for tl in text_lines]))
 
         if self.showpageno:
             self.write_text('Page %s\n' % ltpage.pageid)

@@ -5,7 +5,7 @@ from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfdevice import PDFDevice, TagExtractor
 from pdfminer.pdfpage import PDFPage
-from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
+from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter, TextConverterWithSimpleOrdering
 from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
@@ -17,7 +17,7 @@ def main(argv):
         print ('usage: %s [-d] [-p pagenos] [-m maxpages] [-P password] [-o output]'
                ' [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin] [-W word_margin]'
                ' [-F boxes_flow] [-Y layout_mode] [-O output_dir] [-R rotation] [-S]'
-               ' [-t text|html|xml|tag] [-c codec] [-s scale]'
+               ' [-t text|text_ordered|html|xml|tag] [-c codec] [-s scale]'
                ' file ...' % argv[0])
         return 100
     try:
@@ -87,6 +87,9 @@ def main(argv):
         outfp = sys.stdout
     if outtype == 'text':
         device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
+                               imagewriter=imagewriter)
+    elif outtype == 'text_ordered':
+        device = TextConverterWithSimpleOrdering(rsrcmgr, outfp, codec=codec, laparams=laparams,
                                imagewriter=imagewriter)
     elif outtype == 'xml':
         device = XMLConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
